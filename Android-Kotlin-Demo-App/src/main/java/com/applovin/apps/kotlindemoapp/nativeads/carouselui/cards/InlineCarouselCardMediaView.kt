@@ -8,6 +8,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Handler
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
@@ -209,13 +210,13 @@ class InlineCarouselCardMediaView : FrameLayout, TextureView.SurfaceTextureListe
                     }
                     catch (ex: Exception)
                     {
-                        sdk!!.logger.e(TAG, "Unable to perform post-preparation setup", ex)
+                        Log.e(TAG, "Unable to perform post-preparation setup", ex)
                     }
                 }
 
                 mediaPlayer!!.setOnCompletionListener { mp ->
                     var percentViewed = calculatePercentViewed(mp)
-                    sdk!!.logger.d(TAG, "OnCompletion invoked at " + percentViewed)
+                    Log.d(TAG, "OnCompletion invoked at " + percentViewed)
 
                     // Some Android devices report 0 on completion. So if we've both started and ended organically, this is a success case.
                     if (percentViewed == 0)
@@ -257,14 +258,14 @@ class InlineCarouselCardMediaView : FrameLayout, TextureView.SurfaceTextureListe
                 }
 
                 mediaPlayer!!.setOnErrorListener { mp, what, extra ->
-                    sdk!!.logger.w(TAG, "MediaPlayer error: ($what, $extra)")
+                    Log.w(TAG, "MediaPlayer error: ($what, $extra)")
                     true
                 }
 
             }
             catch (ex: Exception)
             {
-                sdk!!.logger.e(TAG, "Unable to build media player.", ex)
+                Log.e(TAG, "Unable to build media player.", ex)
             }
 
         }
@@ -287,7 +288,7 @@ class InlineCarouselCardMediaView : FrameLayout, TextureView.SurfaceTextureListe
 
         val mediaPlayer = mp ?: this.mediaPlayer
 
-        sdk!!.logger.d(TAG, "Video play requested...")
+        Log.d(TAG, "Video play requested...")
         if (AppLovinSdkUtils.isValidString(ad!!.videoUrl))
         {
             if (cardState!!.muteState == InlineCarouselCardState.MuteState.UNSPECIFIED)
@@ -518,7 +519,7 @@ class InlineCarouselCardMediaView : FrameLayout, TextureView.SurfaceTextureListe
     {
         if (sdk != null)
         {
-            sdk!!.logger.d(TAG, "Video precache complete.")
+            Log.d(TAG, "Video precache complete.")
         }
 
         if (cardState != null && cardState!!.isCurrentlyActive)
@@ -554,7 +555,7 @@ class InlineCarouselCardMediaView : FrameLayout, TextureView.SurfaceTextureListe
         catch (ex: Exception)
         {
             bitmap = null
-            sdk!!.logger.d(TAG, "Unable to grab video frame for: " + Uri.parse(ad!!.videoUrl))
+            Log.d(TAG, "Unable to grab video frame for: " + Uri.parse(ad!!.videoUrl))
         }
         finally
         {
@@ -649,7 +650,7 @@ class InlineCarouselCardMediaView : FrameLayout, TextureView.SurfaceTextureListe
         catch (ex: Exception)
         {
             // This is not a fatal case as media players may well be destroyed or being destroyed by Android already.
-            sdk!!.logger.d(TAG, "Encountered exception when destroying:" + ex)
+            Log.d(TAG, "Encountered exception when destroying:" + ex)
         }
 
     }

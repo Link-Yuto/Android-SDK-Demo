@@ -1,6 +1,7 @@
 package com.applovin.apps.kotlindemoapp.nativeads.carouselui.cards
 
 import android.content.Context
+import android.util.Log
 import android.util.SparseArray
 import android.view.Gravity
 import android.view.View
@@ -20,7 +21,7 @@ class InlineCarouselAdapter(private val context: Context, private val sdk: AppLo
 
     override fun getView(position: Int, pager: SdkCenteredViewPager): View
     {
-        sdk.logger.d(TAG, "Adapter is creating a card for position " + position)
+        Log.d(TAG, "Adapter is creating a card for position " + position)
 
         val slots = parentView.getNativeAds()
         if (position < slots.size)
@@ -44,7 +45,7 @@ class InlineCarouselAdapter(private val context: Context, private val sdk: AppLo
         }
         else
         {
-            sdk.logger.e(TAG, "Unable to render widget slot: Requested position does not exist.")
+            Log.e(TAG, "Unable to render widget slot: Requested position does not exist.")
             return View(context)
         }
     }
@@ -56,7 +57,7 @@ class InlineCarouselAdapter(private val context: Context, private val sdk: AppLo
         val count = slots.size
         if (count <= 1)
         {
-            sdk.logger.e(TAG, "Asked to render a view pager but only one slot is available!")
+            Log.e(TAG, "Asked to render a view pager but only one slot is available!")
             return 0
         }
         else
@@ -77,7 +78,7 @@ class InlineCarouselAdapter(private val context: Context, private val sdk: AppLo
 
     fun destroyCards()
     {
-        sdk.logger.d(TAG, "Destroying all owned cards")
+        Log.d(TAG, "Destroying all owned cards")
         (0..existingCards.size() - 1)
                 .mapNotNull { existingCards.get(it) }
                 .map { it.get() }

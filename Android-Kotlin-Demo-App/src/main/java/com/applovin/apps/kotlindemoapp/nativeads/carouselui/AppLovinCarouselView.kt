@@ -115,7 +115,7 @@ class AppLovinCarouselView @JvmOverloads constructor(context: Context, attrs: At
         }
         else
         {
-            sdk!!.logger.d(TAG, "Cannot render a new native ad group into a carousel view that's already been populated.")
+            Log.d(TAG, "Cannot render a new native ad group into a carousel view that's already been populated.")
         }
     }
 
@@ -152,7 +152,7 @@ class AppLovinCarouselView @JvmOverloads constructor(context: Context, attrs: At
             }
             catch (ex: Exception)
             {
-                sdk!!.logger.e(TAG, "Unable to render carousel view: ", ex)
+                Log.e(TAG, "Unable to render carousel view: ", ex)
             }
         })
     }
@@ -228,7 +228,7 @@ class AppLovinCarouselView @JvmOverloads constructor(context: Context, attrs: At
 
     fun getCardState(position: Int): InlineCarouselCardState?
     {
-        sdk!!.logger.d(TAG, "Looking up card state for position " + position)
+        Log.d(TAG, "Looking up card state for position " + position)
         if (position < 0)
         {
             return null
@@ -239,12 +239,12 @@ class AppLovinCarouselView @JvmOverloads constructor(context: Context, attrs: At
             val state = cardStates!![position]
             if (state != null)
             {
-                sdk!!.logger.d(TAG, "Returning existing card state for position " + position)
+                Log.d(TAG, "Returning existing card state for position " + position)
                 return state
             }
         }
 
-        sdk!!.logger.d(TAG, "Instantiating new card state for position " + position)
+        Log.d(TAG, "Instantiating new card state for position " + position)
         val state = InlineCarouselCardState()
         cardStates!!.put(position, state)
         return state
@@ -418,7 +418,7 @@ class AppLovinCarouselView @JvmOverloads constructor(context: Context, attrs: At
         }
         catch (ex: Exception)
         {
-            sdk!!.logger.w(TAG, "Error during activity stop", ex)
+            Log.w(TAG, "Error during activity stop", ex)
         }
 
     }

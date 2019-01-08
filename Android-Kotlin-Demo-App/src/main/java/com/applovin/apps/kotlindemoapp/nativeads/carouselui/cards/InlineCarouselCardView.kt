@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -134,7 +135,7 @@ class InlineCarouselCardView : FrameLayout, InlineCarouselCardCallbacks, AppLovi
     {
         val sanitizedRating = java.lang.Float.toString(starRating).replace(".", "_")
         val resourceName = "applovin_star_sprite_" + sanitizedRating
-        sdk!!.logger.d("InlineCarouselCardView", "Looking up resource named: " + resourceName)
+        Log.d("InlineCarouselCardView", "Looking up resource named: " + resourceName)
         val drawableId = context.resources.getIdentifier(resourceName, "drawable", context.packageName)
         return context.resources.getDrawable(drawableId)
     }

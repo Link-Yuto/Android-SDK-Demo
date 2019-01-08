@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -213,7 +214,7 @@ public class InlineCarouselCardView
     {
         final String sanitizedRating = Float.toString( starRating ).replace( ".", "_" );
         final String resourceName = "applovin_star_sprite_" + sanitizedRating;
-        sdk.getLogger().d( "InlineCarouselCardView", "Looking up resource named: " + resourceName );
+        Log.d( "InlineCarouselCardView", "Looking up resource named: " + resourceName );
         final int drawableId = getContext().getResources().getIdentifier( resourceName, "drawable", getContext().getPackageName() );
         return getContext().getResources().getDrawable( drawableId );
     }

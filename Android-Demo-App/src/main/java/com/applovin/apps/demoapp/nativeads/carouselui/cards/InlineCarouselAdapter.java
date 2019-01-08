@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
@@ -39,7 +40,7 @@ public class InlineCarouselAdapter
     @Override
     public View getView(int newPosition, SdkCenteredViewPager pager)
     {
-        sdk.getLogger().d( TAG, "Adapter is creating a card for position " + newPosition );
+        Log.d( TAG, "Adapter is creating a card for position " + newPosition );
 
         final List<AppLovinNativeAd> slots = parentView.getNativeAds();
         if ( slots != null && newPosition < slots.size() )
@@ -63,7 +64,7 @@ public class InlineCarouselAdapter
         }
         else
         {
-            sdk.getLogger().e( TAG, "Unable to render widget slot: Requested position does not exist." );
+            Log.e( TAG, "Unable to render widget slot: Requested position does not exist." );
             return new View( context );
         }
     }
@@ -76,7 +77,7 @@ public class InlineCarouselAdapter
         final int count = ( slots != null ) ? slots.size() : 0;
         if ( count <= 1 )
         {
-            sdk.getLogger().e( TAG, "Asked to render a view pager but only one slot is available!" );
+            Log.e( TAG, "Asked to render a view pager but only one slot is available!" );
             return 0;
         }
         else
@@ -98,7 +99,7 @@ public class InlineCarouselAdapter
 
     public void destroyCards()
     {
-        sdk.getLogger().d( TAG, "Destroying all owned cards" );
+        Log.d( TAG, "Destroying all owned cards" );
         for ( int i = 0; i < existingCards.size(); i++ )
         {
             final WeakReference<InlineCarouselCardView> cardRef = existingCards.get( i );

@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -281,7 +282,7 @@ public class InlineCarouselCardMediaView
                         }
                         catch ( Exception ex )
                         {
-                            sdk.getLogger().e( TAG, "Unable to perform post-preparation setup", ex );
+                            Log.e( TAG, "Unable to perform post-preparation setup", ex );
                         }
                     }
                 } );
@@ -293,7 +294,7 @@ public class InlineCarouselCardMediaView
                     {
 
                         int percentViewed = calculatePercentViewed( mp );
-                        sdk.getLogger().d( TAG, "OnCompletion invoked at " + percentViewed );
+                        Log.d( TAG, "OnCompletion invoked at " + percentViewed );
 
                         // Some Android devices report 0 on completion. So if we've both started and ended organically, this is a success case.
                         if ( percentViewed == 0 )
@@ -343,7 +344,7 @@ public class InlineCarouselCardMediaView
                     @Override
                     public boolean onError(MediaPlayer mp, int what, int extra)
                     {
-                        sdk.getLogger().w( TAG, "MediaPlayer error: (" + what + ", " + extra + ")" );
+                        Log.w( TAG, "MediaPlayer error: (" + what + ", " + extra + ")" );
                         return true;
                     }
                 } );
@@ -351,7 +352,7 @@ public class InlineCarouselCardMediaView
             }
             catch ( Exception ex )
             {
-                sdk.getLogger().e( TAG, "Unable to build media player.", ex );
+                Log.e( TAG, "Unable to build media player.", ex );
             }
         }
     }
@@ -373,7 +374,7 @@ public class InlineCarouselCardMediaView
 
         final MediaPlayer mediaPlayer = ( mp != null ) ? mp : this.mediaPlayer;
 
-        sdk.getLogger().d( TAG, "Video play requested..." );
+        Log.d( TAG, "Video play requested..." );
         if ( AppLovinSdkUtils.isValidString( ad.getVideoUrl() ) )
         {
             if ( cardState.getMuteState().equals( InlineCarouselCardState.MuteState.UNSPECIFIED ) )
@@ -616,7 +617,7 @@ public class InlineCarouselCardMediaView
     {
         if ( sdk != null )
         {
-            sdk.getLogger().d( TAG, "Video precache complete." );
+            Log.d( TAG, "Video precache complete." );
         }
 
         if ( cardState != null && cardState.isCurrentlyActive() )
@@ -652,7 +653,7 @@ public class InlineCarouselCardMediaView
         catch ( Exception ex )
         {
             bitmap = null;
-            sdk.getLogger().d( TAG, "Unable to grab video frame for: " + Uri.parse( ad.getVideoUrl() ) );
+            Log.d( TAG, "Unable to grab video frame for: " + Uri.parse( ad.getVideoUrl() ) );
         }
         finally
         {
@@ -755,7 +756,7 @@ public class InlineCarouselCardMediaView
         catch ( Exception ex )
         {
             // This is not a fatal case as media players may well be destroyed or being destroyed by Android already.
-            sdk.getLogger().d( TAG, "Encountered exception when destroying:" + ex );
+            Log.d( TAG, "Encountered exception when destroying:" + ex );
         }
     }
 }

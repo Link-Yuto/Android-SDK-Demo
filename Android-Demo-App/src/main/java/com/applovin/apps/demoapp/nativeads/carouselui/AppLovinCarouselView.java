@@ -37,12 +37,15 @@ import static com.applovin.apps.demoapp.nativeads.carouselui.util.LayoutUtils.WR
  * A default AppLovin view which can be used to render native Ads.
  * Attaching this view to a layout will automatically load ads into it.
  */
-public class AppLovinCarouselView extends FrameLayout implements AppLovinActivityCallbacks {
+public class AppLovinCarouselView
+        extends FrameLayout
+        implements AppLovinActivityCallbacks
+{
     private static final String TAG = "AppLovinWidgetView";
 
     // Parents
-    private Activity parentActivity;
-    private Handler uiHandler;
+    private Activity    parentActivity;
+    private Handler     uiHandler;
     private AppLovinSdk sdk;
 
     private boolean wasPaused;
@@ -57,33 +60,39 @@ public class AppLovinCarouselView extends FrameLayout implements AppLovinActivit
     private int lastActiveCardIndex;
 
     // UI support
-    private InlineCarouselAdapter adapter;
-    private SdkCenteredViewPager carouselViewPager;
-    private InlineCarouselCardView singleCardView;
-    private FrameLayout loadingIndicator;
+    private InlineCarouselAdapter                 adapter;
+    private SdkCenteredViewPager                  carouselViewPager;
+    private InlineCarouselCardView                singleCardView;
+    private FrameLayout                           loadingIndicator;
     private Map<Integer, InlineCarouselCardState> cardStates;
 
-    public AppLovinCarouselView(Context context) {
-        this(context, null);
+    public AppLovinCarouselView(Context context)
+    {
+        this( context, null );
     }
 
-    public AppLovinCarouselView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+    public AppLovinCarouselView(Context context, AttributeSet attrs)
+    {
+        this( context, attrs, 0 );
     }
 
-    public AppLovinCarouselView(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, AppLovinSdk.getInstance(context), null);
+    public AppLovinCarouselView(Context context, AttributeSet attrs, int defStyleAttr)
+    {
+        this( context, attrs, defStyleAttr, AppLovinSdk.getInstance( context ), null );
     }
 
-    public AppLovinCarouselView(Context context, AttributeSet attrs, int defStyleAttr, AppLovinSdk sdk, List<AppLovinNativeAd> nativeAds) {
-        super(context, attrs, defStyleAttr);
+    public AppLovinCarouselView(Context context, AttributeSet attrs, int defStyleAttr, AppLovinSdk sdk, List<AppLovinNativeAd> nativeAds)
+    {
+        super( context, attrs, defStyleAttr );
 
-        if (!isInEditMode()) {
+        if ( !isInEditMode() )
+        {
             this.sdk = sdk;
             this.cardStates = new HashMap<Integer, InlineCarouselCardState>();
             this.nativeAds = nativeAds;
 
-            if (context instanceof Activity) {
+            if ( context instanceof Activity )
+            {
                 parentActivity = (Activity) context;
             }
 
@@ -96,7 +105,8 @@ public class AppLovinCarouselView extends FrameLayout implements AppLovinActivit
      * <p/>
      * If you do not explicitly provide ads {@link AppLovinCarouselView#setNativeAds(List)}, the view will load one automatically upon being attached ot the window.
      */
-    public void setLoadListener(AppLovinNativeAdLoadListener loadListener) {
+    public void setLoadListener(AppLovinNativeAdLoadListener loadListener)
+    {
         this.loadListener = loadListener;
     }
 
@@ -105,11 +115,15 @@ public class AppLovinCarouselView extends FrameLayout implements AppLovinActivit
      *
      * @return Copy of current set of native ads.
      */
-    public List<AppLovinNativeAd> getNativeAds() {
-        if (nativeAds != null) {
-            return Collections.unmodifiableList(nativeAds);
-        } else {
-            return Collections.unmodifiableList(new ArrayList<AppLovinNativeAd>(0));
+    public List<AppLovinNativeAd> getNativeAds()
+    {
+        if ( nativeAds != null )
+        {
+            return Collections.unmodifiableList( nativeAds );
+        }
+        else
+        {
+            return Collections.unmodifiableList( new ArrayList<AppLovinNativeAd>( 0 ) );
         }
     }
 
@@ -118,140 +132,171 @@ public class AppLovinCarouselView extends FrameLayout implements AppLovinActivit
      *
      * @param nativeAds Ads to render.
      */
-    public void setNativeAds(List<AppLovinNativeAd> nativeAds) {
-        if (this.nativeAds == null) {
+    public void setNativeAds(List<AppLovinNativeAd> nativeAds)
+    {
+        if ( this.nativeAds == null )
+        {
             this.nativeAds = nativeAds;
             renderCarousel();
-        } else {
-            sdk.getLogger().d(TAG, "Cannot render a new native ad group into a carousel view that's already been populated.");
+        }
+        else
+        {
+            Log.d( TAG, "Cannot render a new native ad group into a carousel view that's already been populated." );
         }
     }
 
-    public void renderCarousel() {
-        runOnUiThread(new Runnable() {
+    public void renderCarousel()
+    {
+        runOnUiThread( new Runnable()
+        {
             @Override
-            public void run() {
-                if (!(Build.VERSION.SDK_INT >= 16)) {
-                    Log.e(TAG, "AppLovin CarouselView cannot be rendered on systems older than Jelly Bean (4.1); drawing blank view...");
+            public void run()
+            {
+                if ( !( Build.VERSION.SDK_INT >= 16 ) )
+                {
+                    Log.e( TAG, "AppLovin CarouselView cannot be rendered on systems older than Jelly Bean (4.1); drawing blank view..." );
                     return;
                 }
 
-                try {
+                try
+                {
                     final int numCards = nativeAds.size();
-                    if (numCards == 1) {
+                    if ( numCards == 1 )
+                    {
                         // If there is only one ad, don't bother w/ a view pager. JUst attach a card to the parent layout.
                         renderSingleView();
                         removeLoadingIndicator();
-                    } else if (numCards >= 2) {
+                    }
+                    else if ( numCards >= 2 )
+                    {
                         // 2+ cards means we need a view pager.
                         singleCardView = null;
                         renderViewPager();
 
-                        if (lastActiveCardIndex > 0) {
-                            carouselViewPager.setCurrentItem(lastActiveCardIndex, false);
+                        if ( lastActiveCardIndex > 0 )
+                        {
+                            carouselViewPager.setCurrentItem( lastActiveCardIndex, false );
                         }
 
                     }
-                } catch (Exception ex) {
-                    sdk.getLogger().e(TAG, "Unable to render carousel view: ", ex);
+                }
+                catch ( Exception ex )
+                {
+                    Log.e( TAG, "Unable to render carousel view: ", ex );
                 }
             }
-        });
+        } );
     }
 
-    private void renderSingleView() {
-        singleCardView = new InlineCarouselCardView(getContext());
-        singleCardView.setSdk(sdk);
-        singleCardView.setAd(nativeAds.get(0));
+    private void renderSingleView()
+    {
+        singleCardView = new InlineCarouselCardView( getContext() );
+        singleCardView.setSdk( sdk );
+        singleCardView.setAd( nativeAds.get( 0 ) );
 
         final InlineCarouselCardState singleCardState = new InlineCarouselCardState();
-        singleCardState.setCurrentlyActive(true);
+        singleCardState.setCurrentlyActive( true );
 
-        singleCardView.setCardState(singleCardState);
+        singleCardView.setCardState( singleCardState );
         singleCardView.setUpView();
 
-        singleCardView.setLayoutParams(LayoutUtils.createLinearParams(LayoutUtils.MATCH_PARENT, LayoutUtils.MATCH_PARENT, Gravity.CENTER, new LayoutUtils.DPMargins(getContext(), AppLovinCarouselViewSettings.VIEW_PAGER_MARGIN, 0, AppLovinCarouselViewSettings.VIEW_PAGER_MARGIN, 0)));
+        singleCardView.setLayoutParams( LayoutUtils.createLinearParams( LayoutUtils.MATCH_PARENT, LayoutUtils.MATCH_PARENT, Gravity.CENTER, new LayoutUtils.DPMargins( getContext(), AppLovinCarouselViewSettings.VIEW_PAGER_MARGIN, 0, AppLovinCarouselViewSettings.VIEW_PAGER_MARGIN, 0 ) ) );
 
-        addView(singleCardView);
+        addView( singleCardView );
     }
 
-    private void renderViewPager() {
+    private void renderViewPager()
+    {
         // Use view pager
-        carouselViewPager = new SdkCenteredViewPager(getContext());
-        carouselViewPager.setFocusable(false);
-        carouselViewPager.setFocusableInTouchMode(false);
-        carouselViewPager.setLayoutParams(LayoutUtils.createLinearParams(LayoutUtils.MATCH_PARENT, LayoutUtils.MATCH_PARENT, Gravity.CENTER));
-        carouselViewPager.setBackgroundColor(AppLovinCarouselViewSettings.VIEW_PAGER_BACKGROUND_COLOR);
-        carouselViewPager.setPageMargin(AppLovinCarouselViewSettings.VIEW_PAGER_MARGIN);
-        carouselViewPager.setOffscreenPageLimit(AppLovinCarouselViewSettings.VIEW_PAGER_OFF_SCREEN_PAGE_LIMIT);
+        carouselViewPager = new SdkCenteredViewPager( getContext() );
+        carouselViewPager.setFocusable( false );
+        carouselViewPager.setFocusableInTouchMode( false );
+        carouselViewPager.setLayoutParams( LayoutUtils.createLinearParams( LayoutUtils.MATCH_PARENT, LayoutUtils.MATCH_PARENT, Gravity.CENTER ) );
+        carouselViewPager.setBackgroundColor( AppLovinCarouselViewSettings.VIEW_PAGER_BACKGROUND_COLOR );
+        carouselViewPager.setPageMargin( AppLovinCarouselViewSettings.VIEW_PAGER_MARGIN );
+        carouselViewPager.setOffscreenPageLimit( AppLovinCarouselViewSettings.VIEW_PAGER_OFF_SCREEN_PAGE_LIMIT );
 
-        carouselViewPager.setClipToPadding(false);
+        carouselViewPager.setClipToPadding( false );
 
-        adapter = new InlineCarouselAdapter(getContext(), sdk, this);
+        adapter = new InlineCarouselAdapter( getContext(), sdk, this );
 
-        carouselViewPager.setAdapter(this.adapter);
+        carouselViewPager.setAdapter( this.adapter );
 
-        carouselViewPager.setOnPageChangeListener(new SdkCenteredViewPager.OnPageChangeListener() {
+        carouselViewPager.setOnPageChangeListener( new SdkCenteredViewPager.OnPageChangeListener()
+        {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
                 // Useless for us.
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-                if (state == SdkCenteredViewPager.SCROLL_STATE_IDLE) {
+            public void onPageScrollStateChanged(int state)
+            {
+                if ( state == SdkCenteredViewPager.SCROLL_STATE_IDLE )
+                {
                     final int currentItem = carouselViewPager.getCurrentItem();
                     lastActiveCardIndex = currentItem;
 
                     // Activate the current card if it exists (which it should always)
-                    activateCard(currentItem);
+                    activateCard( currentItem );
 
                     // Deactivate the left card if it exists
-                    deactivateCard(currentItem - 1);
+                    deactivateCard( currentItem - 1 );
 
                     // Deactivate the right card if it exists
-                    deactivateCard(currentItem + 1);
+                    deactivateCard( currentItem + 1 );
                 }
             }
 
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(int position)
+            {
                 // Useless, invoked when .setPage(int) is called
             }
-        });
+        } );
 
-        addView(carouselViewPager);
+        addView( carouselViewPager );
         removeLoadingIndicator();
     }
 
-    public InlineCarouselCardState getCardState(final int position) {
-        sdk.getLogger().d(TAG, "Looking up card state for position " + position);
-        if (position < 0) {
+    public InlineCarouselCardState getCardState(final int position)
+    {
+        Log.d( TAG, "Looking up card state for position " + position );
+        if ( position < 0 )
+        {
             return null;
         }
 
-        if (cardStates.size() >= position + 1) {
-            final InlineCarouselCardState state = cardStates.get(position);
-            if (state != null) {
-                sdk.getLogger().d(TAG, "Returning existing card state for position " + position);
+        if ( cardStates.size() >= position + 1 )
+        {
+            final InlineCarouselCardState state = cardStates.get( position );
+            if ( state != null )
+            {
+                Log.d( TAG, "Returning existing card state for position " + position );
                 return state;
             }
         }
 
-        sdk.getLogger().d(TAG, "Instantiating new card state for position " + position);
+        Log.d( TAG, "Instantiating new card state for position " + position );
         final InlineCarouselCardState state = new InlineCarouselCardState();
-        cardStates.put(position, state);
+        cardStates.put( position, state );
         return state;
     }
 
-    private void activateCard(int currentItem) {
-        final InlineCarouselCardState cardState = getCardState(currentItem);
-        if (cardState != null) {
-            if (!cardState.isCurrentlyActive()) {
-                final WeakReference<InlineCarouselCardView> currentCardRef = adapter.getExistingCard(currentItem);
-                if (currentCardRef != null) {
+    private void activateCard(int currentItem)
+    {
+        final InlineCarouselCardState cardState = getCardState( currentItem );
+        if ( cardState != null )
+        {
+            if ( !cardState.isCurrentlyActive() )
+            {
+                final WeakReference<InlineCarouselCardView> currentCardRef = adapter.getExistingCard( currentItem );
+                if ( currentCardRef != null )
+                {
                     final InlineCarouselCardView currentCard = currentCardRef.get();
-                    if (currentCard != null) {
+                    if ( currentCard != null )
+                    {
                         currentCard.onCardActivated();
                     }
                 }
@@ -259,14 +304,19 @@ public class AppLovinCarouselView extends FrameLayout implements AppLovinActivit
         }
     }
 
-    private void deactivateCard(int currentItem) {
-        final InlineCarouselCardState cardState = getCardState(currentItem);
-        if (cardState != null) {
-            if (cardState.isCurrentlyActive()) {
-                final WeakReference<InlineCarouselCardView> currentCardRef = adapter.getExistingCard(currentItem);
-                if (currentCardRef != null) {
+    private void deactivateCard(int currentItem)
+    {
+        final InlineCarouselCardState cardState = getCardState( currentItem );
+        if ( cardState != null )
+        {
+            if ( cardState.isCurrentlyActive() )
+            {
+                final WeakReference<InlineCarouselCardView> currentCardRef = adapter.getExistingCard( currentItem );
+                if ( currentCardRef != null )
+                {
                     final InlineCarouselCardView currentCard = currentCardRef.get();
-                    if (currentCard != null) {
+                    if ( currentCard != null )
+                    {
                         currentCard.onCardDeactivated();
                     }
                 }
@@ -280,123 +330,153 @@ public class AppLovinCarouselView extends FrameLayout implements AppLovinActivit
      * the view pager still receives drag events even if the video views consume click events.
      */
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (carouselViewPager != null) {
-            carouselViewPager.onTouchEvent(ev);
+    public boolean onInterceptTouchEvent(MotionEvent ev)
+    {
+        if ( carouselViewPager != null )
+        {
+            carouselViewPager.onTouchEvent( ev );
         }
 
         return false;
     }
 
     @Override
-    protected void onAttachedToWindow() {
+    protected void onAttachedToWindow()
+    {
         super.onAttachedToWindow();
 
-        if (nativeAds == null && AppLovinCarouselViewSettings.NUM_ADS_TO_AUTOLOAD > 0) {
-            sdk.getNativeAdService().loadNativeAds(AppLovinCarouselViewSettings.NUM_ADS_TO_AUTOLOAD, new AppLovinNativeAdLoadListener() {
+        if ( nativeAds == null && AppLovinCarouselViewSettings.NUM_ADS_TO_AUTOLOAD > 0 )
+        {
+            sdk.getNativeAdService().loadNativeAds( AppLovinCarouselViewSettings.NUM_ADS_TO_AUTOLOAD, new AppLovinNativeAdLoadListener()
+            {
                 @Override
-                public void onNativeAdsLoaded(final List /* <AppLovinNativeAd> */ nativeAds) {
-                    getUiHandler().post(new Runnable() {
+                public void onNativeAdsLoaded(final List /* <AppLovinNativeAd> */ nativeAds)
+                {
+                    getUiHandler().post( new Runnable()
+                    {
                         @Override
-                        public void run() {
-                            setNativeAds(nativeAds);
+                        public void run()
+                        {
+                            setNativeAds( nativeAds );
 
-                            if (loadListener != null) {
-                                loadListener.onNativeAdsLoaded(nativeAds);
+                            if ( loadListener != null )
+                            {
+                                loadListener.onNativeAdsLoaded( nativeAds );
                             }
                         }
-                    });
+                    } );
                 }
 
                 @Override
-                public void onNativeAdsFailedToLoad(final int errorCode) {
-                    getUiHandler().post(new Runnable() {
+                public void onNativeAdsFailedToLoad(final int errorCode)
+                {
+                    getUiHandler().post( new Runnable()
+                    {
                         @Override
-                        public void run() {
-                            if (loadListener != null) {
-                                loadListener.onNativeAdsFailedToLoad(errorCode);
+                        public void run()
+                        {
+                            if ( loadListener != null )
+                            {
+                                loadListener.onNativeAdsFailedToLoad( errorCode );
                             }
                         }
-                    });
+                    } );
                 }
-            });
+            } );
         }
     }
 
-    private void removeLoadingIndicator() {
+    private void removeLoadingIndicator()
+    {
         // Fade out the loading indicator - post delayed to allow time for viewpager sizing to complete (due to android layout passes)
-        postDelayed(new Runnable() {
+        postDelayed( new Runnable()
+        {
             @Override
-            public void run() {
-                final AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
-                fadeOut.setDuration(1000);
-                fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            public void run()
+            {
+                final AlphaAnimation fadeOut = new AlphaAnimation( 1f, 0f );
+                fadeOut.setDuration( 1000 );
+                fadeOut.setAnimationListener( new Animation.AnimationListener()
+                {
                     @Override
-                    public void onAnimationStart(Animation animation) {
+                    public void onAnimationStart(Animation animation)
+                    {
                     }
 
                     @Override
-                    public void onAnimationEnd(Animation animation) {
-                        removeView(loadingIndicator);
+                    public void onAnimationEnd(Animation animation)
+                    {
+                        removeView( loadingIndicator );
                         loadingIndicator = null;
 
-                        getUiHandler().postDelayed(new Runnable() {
+                        getUiHandler().postDelayed( new Runnable()
+                        {
                             @Override
-                            public void run() {
+                            public void run()
+                            {
                                 // Scroll and center-lock the first card.
-                                if (carouselViewPager != null) {
-                                    carouselViewPager.scrollToItem(lastActiveCardIndex, true, 20, false);
+                                if ( carouselViewPager != null )
+                                {
+                                    carouselViewPager.scrollToItem( lastActiveCardIndex, true, 20, false );
                                 }
                             }
-                        }, 500);
+                        }, 500 );
                     }
 
                     @Override
-                    public void onAnimationRepeat(Animation animation) {
+                    public void onAnimationRepeat(Animation animation)
+                    {
 
                     }
-                });
+                } );
 
-                loadingIndicator.startAnimation(fadeOut);
+                loadingIndicator.startAnimation( fadeOut );
             }
-        }, 1000);
+        }, 1000 );
     }
 
-    private void renderActivityIndicator() {
-        loadingIndicator = new FrameLayout(getContext());
-        loadingIndicator.setLayoutParams(LayoutUtils.createFrameParams(MATCH_PARENT, MATCH_PARENT, Gravity.CENTER));
-        loadingIndicator.setBackgroundColor(AppLovinCarouselViewSettings.VIEW_PAGER_BACKGROUND_COLOR);
-        final ProgressBar progressBar = new ProgressBar(getContext());
-        progressBar.setIndeterminate(true);
-        progressBar.setLayoutParams(LayoutUtils.createFrameParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.CENTER));
-        loadingIndicator.addView(progressBar);
-        addView(loadingIndicator);
-        bringChildToFront(loadingIndicator);
+    private void renderActivityIndicator()
+    {
+        loadingIndicator = new FrameLayout( getContext() );
+        loadingIndicator.setLayoutParams( LayoutUtils.createFrameParams( MATCH_PARENT, MATCH_PARENT, Gravity.CENTER ) );
+        loadingIndicator.setBackgroundColor( AppLovinCarouselViewSettings.VIEW_PAGER_BACKGROUND_COLOR );
+        final ProgressBar progressBar = new ProgressBar( getContext() );
+        progressBar.setIndeterminate( true );
+        progressBar.setLayoutParams( LayoutUtils.createFrameParams( WRAP_CONTENT, WRAP_CONTENT, Gravity.CENTER ) );
+        loadingIndicator.addView( progressBar );
+        addView( loadingIndicator );
+        bringChildToFront( loadingIndicator );
     }
 
     @Override
-    public void onResume(Activity activity) {
-        if (parentActivity == null) {
+    public void onResume(Activity activity)
+    {
+        if ( parentActivity == null )
+        {
             parentActivity = activity;
         }
 
-        if (wasPaused) {
+        if ( wasPaused )
+        {
             renderActivityIndicator();
 
             renderCarousel();
 
-            if (carouselViewPager != null) {
-                carouselViewPager.setCurrentItem(lastActiveCardIndex);
-                activateCard(carouselViewPager.getCurrentItem());
+            if ( carouselViewPager != null )
+            {
+                carouselViewPager.setCurrentItem( lastActiveCardIndex );
+                activateCard( carouselViewPager.getCurrentItem() );
             }
         }
     }
 
     @Override
-    public void onStop(Activity activity) {
+    public void onStop(Activity activity)
+    {
         wasPaused = true;
 
-        try {
+        try
+        {
             adapter.destroyCards();
             adapter = null;
 
@@ -404,24 +484,32 @@ public class AppLovinCarouselView extends FrameLayout implements AppLovinActivit
 
             carouselViewPager = null;
             singleCardView = null;
-        } catch (Exception ex) {
-            sdk.getLogger().w(TAG, "Error during activity stop", ex);
+        }
+        catch ( Exception ex )
+        {
+            Log.w( TAG, "Error during activity stop", ex );
         }
     }
 
-    private Handler getUiHandler() {
-        if (uiHandler == null) {
-            uiHandler = new Handler(Looper.getMainLooper());
+    private Handler getUiHandler()
+    {
+        if ( uiHandler == null )
+        {
+            uiHandler = new Handler( Looper.getMainLooper() );
         }
 
         return uiHandler;
     }
 
-    private void runOnUiThread(final Runnable r) {
-        if (parentActivity != null) {
-            parentActivity.runOnUiThread(r);
-        } else {
-            getUiHandler().post(r);
+    private void runOnUiThread(final Runnable r)
+    {
+        if ( parentActivity != null )
+        {
+            parentActivity.runOnUiThread( r );
+        }
+        else
+        {
+            getUiHandler().post( r );
         }
     }
 }
