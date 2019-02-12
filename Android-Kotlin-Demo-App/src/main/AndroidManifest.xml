@@ -2,15 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.applovin.apps.kotlindemoapp">
 
-    <!-- These permissions are mandatory to run AppLovin SDK -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
-
-    <!-- These permissions are strongly recommended and will result in higher performance -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <application
         android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
@@ -24,15 +15,9 @@
             android:name="applovin.sdk.key"
             android:value="YOUR_SDK_KEY" />
 
-        <!-- It is VERY IMPORTANT you add the orientation and screenSize config flags if using Version 6.4.0 and above -->
-        <activity
-            android:name="com.applovin.adview.AppLovinInterstitialActivity"
-            android:configChanges="orientation|screenSize" />
-        <activity android:name="com.applovin.adview.AppLovinConfirmationActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
