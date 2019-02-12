@@ -3,7 +3,6 @@ package com.applovin.apps.demoapp.rewarded;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.applovin.adview.AppLovinIncentivizedInterstitial;
 import com.applovin.apps.demoapp.AdStatusActivity;
@@ -30,13 +29,12 @@ public class RewardedVideosZoneActivity
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_rewarded_videos );
 
-        adStatusTextView = (TextView) findViewById( R.id.status_label );
+        adStatusTextView = findViewById( R.id.status_label );
 
-        final Button loadButton = (Button) findViewById( R.id.loadButton );
-        final Button showButton = (Button) findViewById( R.id.showButton );
+        final Button loadButton = findViewById( R.id.loadButton );
+        final Button showButton = findViewById( R.id.showButton );
 
         incentivizedInterstitial = AppLovinIncentivizedInterstitial.create( "YOUR_ZONE_ID", AppLovinSdk.getInstance( this ) );
-        incentivizedInterstitial.setUserIdentifier( "DEMO_USER_IDENTIFIER" ); // Set an optional user identifier used for S2S callbacks
 
         // You need to preload each rewarded video before it can be displayed
         loadButton.setOnClickListener( new View.OnClickListener()

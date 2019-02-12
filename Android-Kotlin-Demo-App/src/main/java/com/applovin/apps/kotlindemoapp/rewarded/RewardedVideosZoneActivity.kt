@@ -6,7 +6,6 @@ import com.applovin.apps.kotlindemoapp.AdStatusActivity
 import com.applovin.apps.kotlindemoapp.R
 import com.applovin.sdk.*
 import kotlinx.android.synthetic.main.activity_rewarded_videos.*
-import java.lang.ref.WeakReference
 
 class RewardedVideosZoneActivity : AdStatusActivity() {
     private var incentivizedInterstitial: AppLovinIncentivizedInterstitial? = null
@@ -24,8 +23,6 @@ class RewardedVideosZoneActivity : AdStatusActivity() {
 
             incentivizedInterstitial = AppLovinIncentivizedInterstitial.create("YOUR_ZONE_ID", AppLovinSdk.getInstance(applicationContext)).apply {
                 // Set an optional user identifier used for S2S callbacks
-
-                userIdentifier = "DEMO_USER_IDENTIFIER"
 
                 preload(object : AppLovinAdLoadListener {
                     override fun adReceived(appLovinAd: AppLovinAd) {
