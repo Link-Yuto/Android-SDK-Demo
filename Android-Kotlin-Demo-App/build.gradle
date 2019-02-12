@@ -39,8 +39,8 @@ android {
         applicationId "com.applovin.apps.kotlindemoapp"
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode 1
-        versionName "1.0"
+        versionCode 10000
+        versionName "1.0.0"
         multiDexEnabled true
     }
     buildTypes {

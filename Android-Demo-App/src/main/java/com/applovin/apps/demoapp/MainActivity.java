@@ -1,19 +1,7 @@
 package com.applovin.apps.demoapp;
 
-import com.applovin.apps.demoapp.banners.BannerDemoMenuActivity;
-import com.applovin.apps.demoapp.eventtracking.EventTrackingActivity;
-import com.applovin.apps.demoapp.interstitials.InterstitialDemoMenuActivity;
-import com.applovin.apps.demoapp.leaders.LeaderDemoMenuActivity;
-import com.applovin.apps.demoapp.mrecs.MRecDemoMenuActivity;
-import com.applovin.apps.demoapp.nativeads.NativeAdDemoMenuActivity;
-import com.applovin.apps.demoapp.rewarded.RewardedVideosActivity;
-import com.applovin.apps.demoapp.rewarded.RewardedVideosDemoMenuActivity;
-import com.applovin.sdk.AppLovinSdk;
-
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -26,6 +14,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.applovin.apps.demoapp.banners.BannerDemoMenuActivity;
+import com.applovin.apps.demoapp.eventtracking.EventTrackingActivity;
+import com.applovin.apps.demoapp.interstitials.InterstitialDemoMenuActivity;
+import com.applovin.apps.demoapp.leaders.LeaderDemoMenuActivity;
+import com.applovin.apps.demoapp.mrecs.MRecDemoMenuActivity;
+import com.applovin.apps.demoapp.nativeads.NativeAdDemoMenuActivity;
+import com.applovin.apps.demoapp.rewarded.RewardedVideosDemoMenuActivity;
+import com.applovin.sdk.AppLovinSdk;
+import com.applovin.sdk.AppLovinSdkConfiguration;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -35,9 +33,6 @@ import java.util.Arrays;
 public class MainActivity
         extends DemoMenuActivity
 {
-    private static final String KEY_SHARED_PREFERENCES_NAMESPACE = "com.applovin.apps.demo.shared_preferences";
-    private static final String KEY_PROMPTED_CONFIG_FLAGS        = "com.applovin.apps.demo.shared_preferences.prompted_config_flags";
-
     private MenuItem muteToggleMenuItem;
 
     @Override
@@ -45,31 +40,23 @@ public class MainActivity
     {
         super.onCreate( savedInstanceState );
 
-        //
-        // Initializing our SDK at launch is very important as it'll start preloading ads in the background.
-        //
-        AppLovinSdk.initializeSdk( getApplicationContext() );
-
-        AppLovinSdk.getInstance( getApplicationContext() ).getSettings().setTestAdsEnabled( true );
-
-        // Warn user if SDK key is invalid
-        boolean isLegitSdkKey = checkSdkKey();
-
-        // Prompt to add config flags if SDK key is legit
-        if ( isLegitSdkKey )
+        AppLovinSdk.getInstance( this ).initializeSdk( new AppLovinSdk.SdkInitializationListener()
         {
-            maybePromptConfigFlags();
-        }
-    }
+            @Override
+            public void onSdkInitialized(final AppLovinSdkConfiguration config)
+            {
+                // SDK finished initialization
+            }
+        } );
 
-    public Intent makeContactIntent()
-    {
-        Intent intent = new Intent( Intent.ACTION_SENDTO );
-        intent.setType( "text/plain" );
-        intent.setData( Uri.parse( "mailto:" + "support@applovin.com" ) );
-        intent.putExtra( Intent.EXTRA_SUBJECT, "Android SDK support" );
-        intent.putExtra( Intent.EXTRA_TEXT, "\n\n\n---\nSDK Version: " + AppLovinSdk.VERSION );
-        return intent;
+        // Mark that we are in a testing environment
+        AppLovinSdk.getInstance( this ).getSettings().setTestAdsEnabled( true );
+
+        // Set an identifier for the current user. This identifier will be tied to various analytics events and rewarded video validation
+        AppLovinSdk.getInstance( this ).setUserIdentifier( "support@applovin.com" );
+
+        // Check that SDK key is present in Android Manifest
+        checkSdkKey();
     }
 
     @Override
@@ -83,7 +70,7 @@ public class MainActivity
                 new DemoMenuItem( "MRecs", "300x250 Rectangular ads typically used in-content", new Intent( this, MRecDemoMenuActivity.class ) ),
                 new DemoMenuItem( "Event Tracking", "Track in-app events for your users", new Intent( this, EventTrackingActivity.class ) ),
                 new DemoMenuItem( "Resources", "https://support.applovin.com/support/home", new Intent( Intent.ACTION_VIEW, Uri.parse( "https://support.applovin.com/support/home" ) ) ),
-                new DemoMenuItem( "Contact", "support@applovin.com", makeContactIntent() )
+                new DemoMenuItem( "Contact", "support@applovin.com", getContactIntent() )
         };
         boolean isTablet = getResources().getBoolean( R.bool.is_tablet );
         if ( isTablet )
@@ -97,7 +84,7 @@ public class MainActivity
         return result;
     }
 
-    private boolean checkSdkKey()
+    private void checkSdkKey()
     {
         final String sdkKey = AppLovinSdk.getInstance( getApplicationContext() ).getSdkKey();
         if ( "YOUR_SDK_KEY".equalsIgnoreCase( sdkKey ) )
@@ -108,27 +95,17 @@ public class MainActivity
                     .setCancelable( false )
                     .setNeutralButton( "OK", null )
                     .show();
-
-            return false;
         }
-
-        return true;
     }
 
-    private void maybePromptConfigFlags()
+    private Intent getContactIntent()
     {
-        final SharedPreferences sharedPrefs = getSharedPreferences( KEY_SHARED_PREFERENCES_NAMESPACE, Context.MODE_PRIVATE );
-        if ( !sharedPrefs.getBoolean( KEY_PROMPTED_CONFIG_FLAGS, false ) )
-        {
-            new AlertDialog.Builder( this )
-                    .setTitle( "IF you are using Android SDK 6.4.0 or above" )
-                    .setMessage( "In your manifest file, please set the \"android:configChanges\" attribute for com.applovin.adview.AppLovinInterstitialActivity to be \"orientation|screenSize\"" )
-                    .setCancelable( false )
-                    .setNeutralButton( "OK", null )
-                    .show();
-
-            sharedPrefs.edit().putBoolean( KEY_PROMPTED_CONFIG_FLAGS, true ).apply();
-        }
+        Intent intent = new Intent( Intent.ACTION_SENDTO );
+        intent.setType( "text/plain" );
+        intent.setData( Uri.parse( "mailto:" + "support@applovin.com" ) );
+        intent.putExtra( Intent.EXTRA_SUBJECT, "Android SDK support" );
+        intent.putExtra( Intent.EXTRA_TEXT, "\n\n\n---\nSDK Version: " + AppLovinSdk.VERSION );
+        return intent;
     }
 
     // Mute Toggling
@@ -138,14 +115,14 @@ public class MainActivity
      */
     private void toggleMute()
     {
-        AppLovinSdk sdk = AppLovinSdk.getInstance( getApplicationContext() );
+        AppLovinSdk sdk = AppLovinSdk.getInstance( this );
         sdk.getSettings().setMuted( !sdk.getSettings().isMuted() );
         muteToggleMenuItem.setIcon( getMuteIconForCurrentSdkMuteSetting() );
     }
 
     private Drawable getMuteIconForCurrentSdkMuteSetting()
     {
-        AppLovinSdk sdk = AppLovinSdk.getInstance( getApplicationContext() );
+        AppLovinSdk sdk = AppLovinSdk.getInstance( this );
         int drawableId = sdk.getSettings().isMuted() ? R.drawable.mute : R.drawable.unmute;
 
         if ( Build.VERSION.SDK_INT >= 22 )
